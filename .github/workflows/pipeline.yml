@@ -1,4 +1,4 @@
-name: pipeline
+name: Pipeline
 
 on:
   pull_request:
@@ -10,27 +10,31 @@ jobs:
   ci:
     strategy:
       matrix:
-        args: ["build", "lint", "test"]
+        task: ["build", "lint", "test"]
         os: [ubuntu-latest]
         go-version: [1.23.1]
     runs-on: ${{ matrix.os }}
+    
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Setup Golang
+
+      - name: Set up Go
         uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go-version }}
-      - name: Cache Golang Deps
+
+      - name: Cache Go modules
         uses: actions/cache@v3
         with:
           path: |
             ~/.cache/go-build
-            ~/go
+            ~/go/pkg/mod
           key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-golang-
-      - name: Run ${{ matrix.args }}
-        run: make ${{ matrix.args }}
+
+      - name: Run task ${{ matrix.task }}
+        run: make ${{ matrix.task }}
         env:
           GOPATH: /home/runner/go
